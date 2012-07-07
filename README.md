@@ -27,7 +27,7 @@ I used this code for some trainings and the main objetive is to have a database 
 Some future changes that I want to commit
 =========================================
 
-<code>
+<pre>
 
 -- - Llave compuesta DNI con tipo:
 
@@ -61,4 +61,4 @@ dia4=# SELECT (documento::doc_comp).tipo FROM prueba ;
  DNI
 (1 fila)
 
-</code>
+</pre>
