@@ -27,10 +27,10 @@ I used this code for some trainings and the main objetive is to have a database 
 Some future changes that I want to commit
 =========================================
 
-<pre>
---TODO:
+<code>
+
 -- - Llave compuesta DNI con tipo:
-/*
+
 dia4=# CREATE TYPE tipo_doc AS ENUM('DNI','Pasaporte','LC');
 CREATE TYPE
 dia4=# CREATE TYPE doc_comp AS (tipo tipo_doc, num bigint);
@@ -60,5 +60,5 @@ dia4=# SELECT (documento::doc_comp).tipo FROM prueba ;
 ------
  DNI
 (1 fila)
-*/
-</pre>
+
+</code>
