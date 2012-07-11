@@ -127,7 +127,8 @@ CREATE TABLE dia4.infraccion (
     gravedad        grav );
 
 CREATE TABLE dia4.veraz (
-    dni         dni UNIQUE, -- REFERENCES dia4.persona  UNIQUE,
+    dni         dni UNIQUE, -- REFERENCES dia4.persona  UNIQUE, -- that code was when persona wasn't partitioned
+    -- limitation, please read:http://www.postgresql.org/docs/9.1/static/ddl-inherit.html at Caveats
     desde       date,
     descripcion text
  );
@@ -155,7 +156,7 @@ CREATE TRIGGER part_maestra BEFORE INSERT ON dia4.persona FOR EACH ROW EXECUTE P
 
 
 
--- INSERCION DE DATOS
+-- Insercion de datos:
 
 INSERT INTO dia4.persona(dni,nombre,apellido,fecha_nac,salario) (
     SELECT
@@ -166,9 +167,7 @@ INSERT INTO dia4.persona(dni,nombre,apellido,fecha_nac,salario) (
         (random()*10000)::NUMERIC(8,2)                                                          --salario
         FROM generate_series(20000000,22000000) i(i));
 
-
 INSERT INTO dia4.empresas VALUES('OPEL','Wi leben motors','Germany'),('FORD','Ford Industries','Germany'),('FIAT','Fab Ita AT','Italy'),('SEAT','S Española AuTo','Spain');
-
 
 INSERT INTO dia4.coche(id_emp, modelo) (
     SELECT
@@ -214,6 +213,8 @@ INSERT INTO dia4.infraccion (
 );
 
 /* don't work, bug?
+No! Is a limitation, please read:http://www.postgresql.org/docs/9.1/static/ddl-inherit.html at Caveats
+
 INSERT INTO dia4.veraz(dni,desde) (
     SELECT
         per.dni,
