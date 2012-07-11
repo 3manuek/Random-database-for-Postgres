@@ -127,7 +127,7 @@ CREATE TABLE dia4.infraccion (
     gravedad        grav );
 
 CREATE TABLE dia4.veraz (
-    dni         dni REFERENCES dia4.persona UNIQUE,
+    dni         dni UNIQUE, -- REFERENCES dia4.persona  UNIQUE,
     desde       date,
     descripcion text
  );
@@ -213,14 +213,23 @@ INSERT INTO dia4.infraccion (
             (SELECT patente FROM dia4.patentes ORDER BY random() LIMIT 30) pat
 );
 
+/* don't work, bug?
 INSERT INTO dia4.veraz(dni,desde) (
     SELECT
-        dni,
+        per.dni,
         (now() - (round(random()*100) || ' days')::interval)::date
     FROM  
-        (SELECT dni FROM dia4.persona ORDER BY random() LIMIT 70 ) per
+        (SELECT temp_.dni FROM dia4.persona temp_ ORDER BY random() LIMIT 70 ) per
 );
+*/
 
+INSERT INTO dia4.veraz(dni,desde) (
+    SELECT
+        per.dni,
+        (now() - (round(random()*100) || ' days')::interval)::date
+    FROM
+        (SELECT distinct temp_.dni, random() FROM dia4.persona temp_ ORDER BY random() LIMIT 70 ) per
+);
 
 --
 -- Sacar Modelos Repetidos, simplemente agrega una C. REVISAR.
