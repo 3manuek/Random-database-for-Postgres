@@ -3,6 +3,8 @@ Random-database-for-Postgres
 
 Just a code to generate random data in the database but with some coherence. Compatible with > 8.4.
 
+The idea of this script is to test or use for educational purposes. The difference of this script is that the 
+data is being generated on the fly, so you may expect some kind of overhead. 
 
 Some Details
 ============
@@ -26,6 +28,11 @@ I used this code for some trainings and the main objetive is to have a database 
 
 Some future changes that I want to commit
 =========================================
+
+- Easy configurable amount of rows
+- More weird things
+- Full text search colums for testing
+- Laboratory data types or unstable features (yes, we *can*!)
 
 <pre>
 
