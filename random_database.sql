@@ -1,4 +1,3 @@
-
 \c template1
 
 DROP DATABASE coches;
@@ -77,8 +76,8 @@ IMMUTABLE CALLED ON NULL INPUT SECURITY INVOKER;
 
 COMMENT ON FUNCTION "public"."validar_cuil"(bigint)
 IS 'Valida el cuil segun formato 99999999999
-Devuelve 0 para los cuil No Válidos
-Devuelve 1 para los cuil Válidos';
+Devuelve 0 para los cuil No Vï¿½lidos
+Devuelve 1 para los cuil Vï¿½lidos';
 
 CREATE DOMAIN cuil AS bigint CHECK(cuil(VALUE));
 
@@ -167,7 +166,7 @@ INSERT INTO dia4.persona(dni,nombre,apellido,fecha_nac,salario) (
         (random()*10000)::NUMERIC(8,2)                                                          --salario
         FROM generate_series(20000000,22000000) i(i));
 
-INSERT INTO dia4.empresas VALUES('OPEL','Wi leben motors','Germany'),('FORD','Ford Industries','Germany'),('FIAT','Fab Ita AT','Italy'),('SEAT','S Española AuTo','Spain');
+INSERT INTO dia4.empresas VALUES('OPEL','Wi leben motors','Germany'),('FORD','Ford Industries','Germany'),('FIAT','Fab Ita AT','Italy'),('SEAT','S Espaï¿½ola AuTo','Spain');
 
 INSERT INTO dia4.coche(id_emp, modelo) (
     SELECT
@@ -181,7 +180,13 @@ INSERT INTO dia4.coche(id_emp, modelo) (
 --DROP FUNCTION retorna_persona_aleatoria();
 
 CREATE OR REPLACE FUNCTION retorna_persona_aleatoria() RETURNS dni AS $BODY$
-SELECT dni FROM dia4.persona order by random() limit 1
+-- SELECT dni FROM dia4.persona order by random() limit 1
+-- Se puede usar el monto de DNIs que usamos en el INSERT
+-- Manteniendo el estilo anterior: SELECT dni FROM generate_series(20000000,22000000) i(dni) order by random() limit 1
+select round((random()*2000002)+19999999);
+-- Este anterior es mas rapido, pero hay que calcular los dni a generar
+-- Ejemplo, si queremos 2M de DNI entre 20M, generamos un aleatorio * 2M+2 (siempre +2) y luego le sumamos
+-- la cantidad de DNIS-1
 $BODY$
 LANGUAGE sql VOLATILE;
 
@@ -190,8 +195,8 @@ SELECT id_coche FROM dia4.coche order by random() limit 1
 $BODY$
 LANGUAGE sql VOLATILE;
 
--- Se podría utilizar desde el fuente el retorno de datos, pero de esta forma,
--- permite la posibilidad de que una persona posea más de dos coches.
+-- Se podrï¿½a utilizar desde el fuente el retorno de datos, pero de esta forma,
+-- permite la posibilidad de que una persona posea mï¿½s de dos coches.
 INSERT INTO dia4.patentes (
     SELECT
         retorna_persona_aleatoria(),                                --dni
