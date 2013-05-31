@@ -6,6 +6,10 @@ Just a code to generate random data in the database but with some coherence. Com
 The idea of this script is to test or use for educational purposes. The difference of this script is that the 
 data is being generated on the fly, so you may expect some kind of overhead. 
 
+NOTE:
+https://github.com/pvh/postgresql-sample-database (Isis.sql) is a nice project and has more data types. I recommend
+to collaborate on this one instead this (code needs some clean up and translation from spanish).
+
 Some Details
 ============
 
