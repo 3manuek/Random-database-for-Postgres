@@ -183,7 +183,7 @@ CREATE OR REPLACE FUNCTION retorna_persona_aleatoria() RETURNS dni AS $BODY$
 -- SELECT dni FROM dia4.persona order by random() limit 1
 -- Se puede usar el monto de DNIs que usamos en el INSERT
 -- Manteniendo el estilo anterior: SELECT dni FROM generate_series(20000000,22000000) i(dni) order by random() limit 1
-select round((random()*2000002)+19999999);
+select round((random()*2000002)+19999999)::dni;
 -- Este anterior es mas rapido, pero hay que calcular los dni a generar
 -- Ejemplo, si queremos 2M de DNI entre 20M, generamos un aleatorio * 2M+2 (siempre +2) y luego le sumamos
 -- la cantidad de DNIS-1
