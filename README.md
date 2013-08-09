@@ -13,16 +13,15 @@ to collaborate on this one instead this (code needs some clean up and translatio
 Some Details
 ============
 
-This code will generate a database with several random values with references and partitioning. TAke in mind 
-that the way of partitioning here is only for test purposes, in the real life will be a chaos partitioning 
-using this kind of check constraints due to:
+This code will generate a database with several random values with references and partitioning. 
+
+You must consider that the following way of partitioning is only  for test purposes. In the real cases will be a 
+chaos use partitioning with this kind of constraint checks as follows:
 
 SELECT * FROM dia4.persona WHERE DNI = 22345543 AND DNI/100000 = 223;
 
-As you can see, you need to add the condition of the check to allow using searching through partitions, which 
-could be un-extensible and expensive for code maintenance. 
-
-I used this way in this example just to experimental purposes, but the normal use is a range of timestamp or serial.
+In the previous examples, we are filtering using a weird condition which can be unextensible and expensive for 
+code maintenance. 
 
 In this script, if you want more data, just raise the generate_series 2nd parameter. Takes time to generate the 
 data, but is a nice tool for test.
