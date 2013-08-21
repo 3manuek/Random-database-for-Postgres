@@ -22,14 +22,14 @@ CREATE DOMAIN sexo AS CHAR(1) CHECK ( upper(VALUE) IN ('F', 'M','I'));
 
 CREATE TYPE doc_comp AS (tipo tipo_doc, num dni);
 
-DROP SCHEMA IF EXISTS dia4 CASCADE;
+DROP SCHEMA IF EXISTS test CASCADE;
 
-CREATE SCHEMA dia4;
+CREATE SCHEMA test;
 
 --CREATE TYPE empresa AS ENUM ('FORD','FIAT','SEAT');
 
 
-CREATE TABLE dia4.persona (
+CREATE TABLE test.persona (
     dni         dni PRIMARY KEY,
     nombre      text NOT NULL,
     apellido    text NOT NULL,
@@ -98,35 +98,35 @@ BEGIN
 END;
 $BADI$ VOLATILE LANGUAGE plpgsql;
 
-CREATE TRIGGER T_actualiza_sexo BEFORE INSERT OR UPDATE ON dia4.persona
+CREATE TRIGGER T_actualiza_sexo BEFORE INSERT OR UPDATE ON test.persona
     FOR EACH ROW EXECUTE PROCEDURE actualiza_sexo();
 
-CREATE TABLE dia4.empresas (
+CREATE TABLE test.empresas (
     id_emp      id_emp PRIMARY KEY,
     nombre_emp  text,
     pais        text
 );    
     
-CREATE TABLE dia4.coche (
+CREATE TABLE test.coche (
     id_coche    serial PRIMARY KEY,
-    id_emp      id_emp REFERENCES dia4.empresas,
+    id_emp      id_emp REFERENCES test.empresas,
     modelo      text );
 
 
-CREATE TABLE dia4.patentes (
-    dni         dni    ,--REFERENCES dia4.persona,
-    id_coche    bigint REFERENCES dia4.coche,
+CREATE TABLE test.patentes (
+    dni         dni    ,--REFERENCES test.persona,
+    id_coche    bigint REFERENCES test.coche,
     patente     CHAR(6) PRIMARY KEY,
     region      CHAR(3) CHECK ( region IN('EXT','NAC') ),
     anno        date );
 
-CREATE TABLE dia4.infraccion (
-    patente         CHAR(6) REFERENCES dia4.patentes,
+CREATE TABLE test.infraccion (
+    patente         CHAR(6) REFERENCES test.patentes,
     fecha           date,
     gravedad        grav );
 
-CREATE TABLE dia4.veraz (
-    dni         dni UNIQUE, -- REFERENCES dia4.persona  UNIQUE, -- that code was when persona wasn't partitioned
+CREATE TABLE test.veraz (
+    dni         dni UNIQUE, -- REFERENCES test.persona  UNIQUE, -- that code was when persona wasn't partitioned
     -- limitation, please read:http://www.postgresql.org/docs/9.1/static/ddl-inherit.html at Caveats
     desde       date,
     descripcion text
@@ -140,24 +140,24 @@ DECLARE
 BEGIN
      select NEW.dni / factor into milion;
     BEGIN
-        EXECUTE 'INSERT INTO dia4.persona_' || milion || ' SELECT (' || QUOTE_LITERAL(NEW) || '::dia4.persona).*' ;
+        EXECUTE 'INSERT INTO test.persona_' || milion || ' SELECT (' || QUOTE_LITERAL(NEW) || '::test.persona).*' ;
     EXCEPTION
     WHEN undefined_table THEN
-          EXECUTE 'CREATE TABLE dia4.persona_' || milion ||
-          '(CHECK (dni / ' || factor || ' = ' || milion || '), PRIMARY KEY (dni)) INHERITS (dia4.persona);';
-          EXECUTE 'INSERT INTO dia4.persona_' || milion || ' SELECT (' || QUOTE_LITERAL(NEW) || '::dia4.persona).*' ;
+          EXECUTE 'CREATE TABLE test.persona_' || milion ||
+          '(CHECK (dni / ' || factor || ' = ' || milion || '), PRIMARY KEY (dni)) INHERITS (test.persona);';
+          EXECUTE 'INSERT INTO test.persona_' || milion || ' SELECT (' || QUOTE_LITERAL(NEW) || '::test.persona).*' ;
     END;
   RETURN NULL;
 END
 $part$ LANGUAGE plpgsql;    
 
-CREATE TRIGGER part_maestra BEFORE INSERT ON dia4.persona FOR EACH ROW EXECUTE PROCEDURE part();
+CREATE TRIGGER part_maestra BEFORE INSERT ON test.persona FOR EACH ROW EXECUTE PROCEDURE part();
 
 
 
 -- Insercion de datos:
 
-INSERT INTO dia4.persona(dni,nombre,apellido,fecha_nac,salario) (
+INSERT INTO test.persona(dni,nombre,apellido,fecha_nac,salario) (
     SELECT
         i::dni,
         ('{Romulo,Ricardo,Romina,Fabricio,Francisca,Noa,Silvia,Priscila,Tiziana,Ana,Horacio,Nayara,Mario}'::text[])[round(random()*12+1)] as nombre,
@@ -166,12 +166,12 @@ INSERT INTO dia4.persona(dni,nombre,apellido,fecha_nac,salario) (
         (random()*10000)::NUMERIC(8,2)                                                          --salario
         FROM generate_series(20000000,22000000) i(i));
 
-INSERT INTO dia4.empresas VALUES('OPEL','Wi leben motors','Germany'),('FORD','Ford Industries','Germany'),('FIAT','Fab Ita AT','Italy'),('SEAT','S Espa�ola AuTo','Spain');
+INSERT INTO test.empresas VALUES('OPEL','Wi leben motors','Germany'),('FORD','Ford Industries','Germany'),('FIAT','Fab Ita AT','Italy'),('SEAT','S Espa�ola AuTo','Spain');
 
-INSERT INTO dia4.coche(id_emp, modelo) (
+INSERT INTO test.coche(id_emp, modelo) (
     SELECT
         --(((SELECT array_agg(enumlabel) FROM pg_enum where enumtypid = 'empresa'::regtype)::text[])[round(random()*2+1)])::empresa,
-        (SELECT id_emp FROM dia4.empresas ORDER BY random() LIMIT 1),
+        (SELECT id_emp FROM test.empresas ORDER BY random() LIMIT 1),
         round(random()*1000)::text
     FROM
         generate_series(1,200)
@@ -180,7 +180,7 @@ INSERT INTO dia4.coche(id_emp, modelo) (
 --DROP FUNCTION retorna_persona_aleatoria();
 
 CREATE OR REPLACE FUNCTION retorna_persona_aleatoria() RETURNS dni AS $BODY$
--- SELECT dni FROM dia4.persona order by random() limit 1
+-- SELECT dni FROM test.persona order by random() limit 1
 -- Se puede usar el monto de DNIs que usamos en el INSERT
 -- Manteniendo el estilo anterior: SELECT dni FROM generate_series(20000000,22000000) i(dni) order by random() limit 1
 select round((random()*2000002)+19999999)::dni;
@@ -191,13 +191,13 @@ $BODY$
 LANGUAGE sql VOLATILE;
 
 CREATE OR REPLACE FUNCTION retorna_coche_aleatorio() RETURNS integer AS $BODY$
-SELECT id_coche FROM dia4.coche order by random() limit 1
+SELECT id_coche FROM test.coche order by random() limit 1
 $BODY$
 LANGUAGE sql VOLATILE;
 
 -- Se podr�a utilizar desde el fuente el retorno de datos, pero de esta forma,
 -- permite la posibilidad de que una persona posea m�s de dos coches.
-INSERT INTO dia4.patentes (
+INSERT INTO test.patentes (
     SELECT
         retorna_persona_aleatoria(),                                --dni
         retorna_coche_aleatorio(),                                  --id_coche
@@ -209,42 +209,42 @@ INSERT INTO dia4.patentes (
 );
 
 
-INSERT INTO dia4.infraccion (
+INSERT INTO test.infraccion (
     SELECT patente,
            (now() - (round(random()*100) || ' days')::interval)::date,
            ((SELECT array_agg(enumlabel) FROM pg_enum where enumtypid = 'grav'::regtype)::grav[])[round(random()*2+1)]::grav
         FROM
-            (SELECT patente FROM dia4.patentes ORDER BY random() LIMIT 30) pat
+            (SELECT patente FROM test.patentes ORDER BY random() LIMIT 30) pat
 );
 
 /* don't work, bug?
 No! Is a limitation, please read:http://www.postgresql.org/docs/9.1/static/ddl-inherit.html at Caveats
 
-INSERT INTO dia4.veraz(dni,desde) (
+INSERT INTO test.veraz(dni,desde) (
     SELECT
         per.dni,
         (now() - (round(random()*100) || ' days')::interval)::date
     FROM  
-        (SELECT temp_.dni FROM dia4.persona temp_ ORDER BY random() LIMIT 70 ) per
+        (SELECT temp_.dni FROM test.persona temp_ ORDER BY random() LIMIT 70 ) per
 );
 */
 
-INSERT INTO dia4.veraz(dni,desde) (
+INSERT INTO test.veraz(dni,desde) (
     SELECT
         per.dni,
         (now() - (round(random()*100) || ' days')::interval)::date
     FROM
-        (SELECT distinct temp_.dni, random() FROM dia4.persona temp_ ORDER BY random() LIMIT 70 ) per
+        (SELECT distinct temp_.dni, random() FROM test.persona temp_ ORDER BY random() LIMIT 70 ) per
 );
 
 --
 -- Sacar Modelos Repetidos, simplemente agrega una C. REVISAR.
 --
-UPDATE dia4.coche
+UPDATE test.coche
     SET modelo = (modelo || 'C')::text
     WHERE (id_emp,modelo) IN
                          (SELECT id_emp, modelo
-                               FROM dia4.coche
+                               FROM test.coche
                                 GROUP BY id_emp, modelo having count(*) >1
                                 ORDER BY id_emp, modelo);
 
