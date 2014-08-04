@@ -74,7 +74,7 @@ END;
 $CUIL$ LANGUAGE 'plpgsql'
 IMMUTABLE CALLED ON NULL INPUT SECURITY INVOKER;
 
-COMMENT ON FUNCTION "public"."validar_cuil"(bigint)
+COMMENT ON FUNCTION "public"."cuil"(bigint)
 IS 'Valida el cuil segun formato 99999999999
 Devuelve 0 para los cuil No V�lidos
 Devuelve 1 para los cuil V�lidos';
